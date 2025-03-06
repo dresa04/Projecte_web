@@ -3,9 +3,9 @@ import requests
 from django.http import HttpRequest, HttpResponse
 from typing import Dict, Any
 
-# Define the Riot API key
-RIOT_API_KEY = "RGAPI-7e14a6d3-cfcc-496e-9640-7856ca4e8338"
+from league_project.settings import RIOT_API_KEY
 
+RIOT_API_KEY = RIOT_API_KEY
 
 def home(request: HttpRequest) -> HttpResponse:
     """

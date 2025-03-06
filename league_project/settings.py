@@ -134,7 +134,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # settings.py
+RIOT_API_KEY = "RGAPI-7e14a6d3-cfcc-496e-9640-7856ca4e8338"
 
-RIOT_REGION = 'na1'  # o cualquier otra región que estés utilizando, como 'euw1', 'kr', etc.
-RIOT_API_KEY = 'RGAPI-7e14a6d3-cfcc-496e-9640-7856ca4e8338'
 
