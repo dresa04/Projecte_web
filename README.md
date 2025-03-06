@@ -1,7 +1,7 @@
 # League of Legends Django Project
 
 ## Descripció del projecte
-Aquesta aplicació web permet als usuaris obtenir el **PUUID** (identificador únic de Riot Games) dels jugadors de League of Legends. També proporciona un catàleg de **campions** i **ítems** del joc, amb informació detallada sobre cadascun.
+Aquesta aplicació web permet als usuaris obtenir el **PUUID** (identificador únic de Riot Games) dels jugadors de League of Legends. També proporciona un catàleg de **campions** i **ítems** del joc, amb informació detallada sobre cadascun.Es pot obtenir mes informació del projecte a [(docs/Intro_MP_Daniel Resa i Abraham Ruiz.pdf)]
 
 ### Funcionalitats principals
 - 🔎 **Cerca de PUUID**: Els usuaris poden introduir el seu nom d'invocador i obtenir el seu identificador únic.
