@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,7 +57,7 @@ ROOT_URLCONF = 'league_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -116,9 +118,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# Configuración de archivos estáticos
+STATIC_URL = '/static/'
+
+# Directorios donde se buscarán los archivos estáticos
+STATICFILES_DIRS = [
+    BASE_DIR
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# settings.py
+
+RIOT_REGION = 'na1'  # o cualquier otra región que estés utilizando, como 'euw1', 'kr', etc.
+RIOT_API_KEY = 'RGAPI-7e14a6d3-cfcc-496e-9640-7856ca4e8338'
+

@@ -1,8 +1,14 @@
+# Entorno virtual
+venv/
+.venv/
+
+# Archivos de configuración sensibles
+*.env
+*.pyc
 __pycache__/
 db.sqlite3
-*.pyc
-*.pyo
-*.pyd
-venv/
-.env
-media/
+settings.py
+
+# Archivos generados automáticamente
+*.log
+migrations/

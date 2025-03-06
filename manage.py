@@ -4,6 +4,9 @@ import os
 import sys
 
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'league_project.settings')
+
+
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'league_project.settings')

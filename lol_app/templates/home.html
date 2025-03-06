@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League of Legends Django Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            padding: 10px;
+        }
+        fieldset {
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            display: inline-block;
+            background-color: white;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏆 Welcome to the League of Legends Django Project! 🏆</h1>
+        <hr>
+    </header>
+
+    <main>
+        <h2>This is the home page.</h2>
+
+        <fieldset>
+            <legend><b>🔍 Explore the Project</b></legend>
+            <ul>
+                <li><a href="{% url 'item_list' %}">🛒 View Items</a></li>
+                <li><a href="{% url 'champion_list' %}">⚔️ View Champions</a></li>
+                <li><a href="{% url 'get_puuid' %}">🔎 Find PUUID</a></li>
+            </ul>
+        </fieldset>
+    </main>
+
+    <footer>
+        <hr>
+        <p>© 2025 League of Legends Django Project. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

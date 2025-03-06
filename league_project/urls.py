@@ -17,6 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from lol_app import views
+from lol_app.views import get_puuid
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('items/', views.item_list, name='item_list'),
+    path('', views.home, name='home'),
+    path('champions/', views.champion_list, name='champion_list'),
+    path('summoner/<str:summoner_name>/', views.summoner_detail, name='summoner_detail'),
+    path('search-puuid/', views.get_puuid, name="get_puuid"),
+
 ]
