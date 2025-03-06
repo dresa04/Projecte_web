@@ -56,7 +56,7 @@ Si tens dubtes o problemes amb el projecte, pots:
 ---
 
 ## 👥 Qui manté el projecte?
-Aquest projecte és desenvolupat per **Daniel Resa** i **Abraham Ruiz**. Les contribucions són benvingudes! Si vols millorar el projecte, no dubtis a fer un `fork` i enviar una `pull request`.
+Aquest projecte és desenvolupat per **Daniel Resa** drp5@alumnes.udl.cat i **Abraham Ruiz** abrahamruizmoste2001@gmail.com. Les contribucions són benvingudes! Si vols millorar el projecte, no dubtis a fer un `fork` i enviar una `pull request`.
 
 ---
 
