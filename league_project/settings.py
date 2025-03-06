@@ -134,6 +134,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # settings.py
-RIOT_API_KEY = "RGAPI-7e14a6d3-cfcc-496e-9640-7856ca4e8338"
+RIOT_API_KEY = "your_api_key"
 
 
