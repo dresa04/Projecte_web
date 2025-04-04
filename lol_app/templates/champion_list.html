@@ -1,50 +1,26 @@
+<!-- champion_list.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Champions - League of Legends</title>
+    <title>List of Champions</title>
 </head>
 <body>
-
-    <h1 style="text-align: center;">🏆 League of Legends Champions 🏆</h1>
-    <hr>
+    <h1>List of Champions</h1>
 
     {% if error %}
-        <h2 style="text-align: center; color: red;">⚠️ {{ error }} ⚠️</h2>
-    {% else %}
-
-        {% for champion in champions %}
-            <!-- champ image -->
-    <img src="{{ champion.image }}" alt="{{ champion.name }}" width="200">
-
-    <!-- name and title -->
-            <h2>{{ champion.id }} - {{ champion.title }}</h2>
-
-            <!-- short description-->
-            <p><i>{{ champion.blurb }}</i></p>
-
-            <!-- labels -->
-            <h3>🔹 Roles:</h3>
-            <ul>
-                {% for tag in champion.tags %}
-                    <li>{{ tag }}</li>
-                {% endfor %}
-            </ul>
-
-            <!-- stadistics -->
-            <h3>📊 Base Stats:</h3>
-            <ul>
-                <li><strong>HP:</strong> {{ champion.stats.hp }}</li>
-                <li><strong>Attack Damage:</strong> {{ champion.stats.attackdamage }}</li>
-                <li><strong>Armor:</strong> {{ champion.stats.armor }}</li>
-                <li><strong>Magic Resist:</strong> {{ champion.stats.spellblock }}</li>
-            </ul>
-
-            <hr>
-        {% endfor %}
-
+        <p style="color: red;">{{ error }}</p>
     {% endif %}
 
+    <ul>
+        {% for champion in champions %}
+            <div class="champion">
+                <h3>{{ champion.champion_id }}</h3> <!-- Nombre del campeón -->
+                <p>Rol: {{ champion.role }}</p>
+                <img src="{{ champion.image_url }}" alt="{{ champion.name }} image">
+            </div>
+        {% endfor %}
+
+    </ul>
 </body>
 </html>
