@@ -69,3 +69,29 @@ def champion_list(request: HttpRequest) -> HttpResponse:
         return render(request, "champion_list.html", {"error": "Could not fetch the champion list."})
 
 
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # iniciar sesión automáticamente después del registro
+            return redirect('home')  # o donde quieras redirigir
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
+
+def home(request):
+    form = AuthenticationForm()
+    return render(request, 'home.html', {'form': form})

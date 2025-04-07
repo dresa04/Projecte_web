@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>League of Legends Player Tracker</title>
-</head>
-<body>
-    <h1>Welcome to the League of Legends Player Tracker!</h1>
-    <p>This is your homepage.</p>
-    <a href="/lol_app/champions/">Go to Champions</a>
-</body>
-</html>
+<!-- home.html -->
+<h1>Bienvenido a League of Legends Tracker</h1>
+
+{% if user.is_authenticated %}
+  <p>Hola, {{ user.username }}</p>
+  <form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Cerrar sesión</button>
+  </form>
+{% else %}
+  <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
+{% endif %}
+{% if user.is_authenticated %}
+  <p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
+{% else %}
+  <p><a href="{% url 'register' %}">Registrarse</a></p>
+{% endif %}
+<p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
