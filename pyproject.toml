@@ -8,8 +8,15 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "django (>=5.1.6,<6.0.0)",
-    "requests (>=2.32.3,<3.0.0)"
+    "django (==5.1.6)",
+    "requests (==2.32.3)",
+    "asgiref (==3.8.1)",
+    "certifi (==2025.1.31)",
+    "charset-normalizer (==3.4.1)",
+    "idna (==3.10)",
+    "pillow (==11.1.0)",
+    "sqlparse (==0.5.3)",
+    "urllib3 (==2.3.0)"
 ]
 
 
