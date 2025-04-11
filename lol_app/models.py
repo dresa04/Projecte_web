@@ -42,7 +42,7 @@ class Match(models.Model):
     def __str__(self):
         return f"Match {self.match_id} - {self.date_played.date()}"
 
-
+# és la relació n-aria entre match userLOL i champion
 class MatchChampion(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     player = models.ForeignKey(UserLOL, on_delete=models.CASCADE)
