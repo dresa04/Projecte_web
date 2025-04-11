@@ -33,13 +33,11 @@ class Review(models.Model):
 
 
 
-
-
 class Match(models.Model):
     match_id = models.CharField(max_length=100, unique=True)
     date_played = models.DateTimeField()
     duration_minutes = models.PositiveIntegerField()
-    players = models.ManyToManyField(UserLOL, related_name="matches")
+    players = models.ManyToManyField(UserLOL, through="MatchChampion", related_name="matches")
     champions = models.ManyToManyField(Champion, through="MatchChampion")
 
     def __str__(self):
