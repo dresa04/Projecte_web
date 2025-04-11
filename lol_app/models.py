@@ -1,6 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+class Champion(models.Model):
+    champion_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, default="Unknown")
+    role = models.CharField(max_length=100, blank=True)
+    image_url = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.name
+
 class UserLOL(models.Model):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=150, unique=True)
@@ -22,14 +32,7 @@ class Review(models.Model):
         return f"Review #{self.review_id} for {self.to_user.username} - {self.title}"
 
 
-class Champion(models.Model):
-    champion_id = models.CharField(max_length=100, unique=True)
-    name = models.CharField(max_length=100, default="Unknown")
-    role = models.CharField(max_length=100, blank=True)
-    image_url = models.URLField(blank=True)
 
-    def __str__(self):
-        return self.name
 
 
 class Match(models.Model):
@@ -59,3 +62,6 @@ class MatchChampion(models.Model):
 
     def __str__(self):
         return f"{self.player.username} played {self.champion.name} in match {self.match.match_id}"
+
+
+
