@@ -9,10 +9,6 @@
   </form>
 {% else %}
   <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
-{% endif %}
-{% if user.is_authenticated %}
-  <p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
-{% else %}
-  <p><a href="{% url 'register' %}">Registrarse</a></p>
+
 {% endif %}
 <p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
