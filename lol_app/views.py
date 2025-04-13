@@ -1,31 +1,33 @@
 from django.shortcuts import render
 from .models import Champion
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
+
 from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')  # Asegúrate de tener esta plantilla
+
+
+# views.py
+import requests
 from typing import Dict, Any
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
+from .models import Champion
+
+from django.shortcuts import render
 import requests
 from .models import Champion
 from typing import Dict, Any
 from django.http import HttpRequest, HttpResponse
 
-
-# views.py
-
-
 def champion_list(request: HttpRequest) -> HttpResponse:
     """
-        Retrieves the list of League of Legends champions using the Riot API
-        and stores the data in the database if they are not already registered.
+    Obté la llista de campions del joc League of Legends mitjançant l'API de Riot
+    i emmagatzema les dades a la base de dades si no estan ja registrades.
 
-        :param request: Django HttpRequest object.
-        :return: HttpResponse with the list of champions rendered in 'champion_list.html'.
+    :param request: Objecte HttpRequest de Django.
+    :return: HttpResponse amb la llista de campions renderitzada en 'champion_list.html'.
     """
-
     version_url: str = "https://ddragon.leagueoflegends.com/api/versions.json"
 
     try:
@@ -69,20 +71,12 @@ def champion_list(request: HttpRequest) -> HttpResponse:
 
 
 
-
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 
 def register(request):
-    """
-    Handles the registration of new users.
-
-    If the request is POST, it validates the user creation form. If it's valid,
-    saves the user, logs them in automatically, and redirects to the home page.
-    If the request is not POST, it displays an empty registration form.
-
-    :param request: Django HttpRequest object.
-    :return: HttpResponse with the registration page or a redirect to the home page.
-"""
-
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -93,6 +87,10 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     form = AuthenticationForm()
