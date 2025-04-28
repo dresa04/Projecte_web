@@ -1,33 +1,28 @@
-from django.shortcuts import render
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from .models import Champion
-
-from django.shortcuts import render
+import requests
+from typing import Dict, Any
+from django.http import HttpRequest, HttpResponse
 
 def home(request):
-    return render(request, 'home.html')  # Asegúrate de tener esta plantilla
+    return render(request, 'home.html')
 
-
-# views.py
-import requests
-from typing import Dict, Any
-from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
-from .models import Champion
-
-from django.shortcuts import render
-import requests
-from .models import Champion
-from typing import Dict, Any
-from django.http import HttpRequest, HttpResponse
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 def champion_list(request: HttpRequest) -> HttpResponse:
-    """
-    Obté la llista de campions del joc League of Legends mitjançant l'API de Riot
-    i emmagatzema les dades a la base de dades si no estan ja registrades.
-
-    :param request: Objecte HttpRequest de Django.
-    :return: HttpResponse amb la llista de campions renderitzada en 'champion_list.html'.
-    """
     version_url: str = "https://ddragon.leagueoflegends.com/api/versions.json"
 
     try:
@@ -44,15 +39,13 @@ def champion_list(request: HttpRequest) -> HttpResponse:
         response.raise_for_status()
         champions_data: Dict[str, Dict[str, Any]] = response.json().get("data", {})
 
-        # Processem els dades dels campions i els guardem a la base de dades
         for champ_id, champ in champions_data.items():
             name = champ["name"]
-            role = champ["tags"][0] if champ["tags"] else "Unknown"  # Agafem el primer tag com a rol
+            role = champ["tags"][0] if champ["tags"] else "Unknown"
             image_url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{champ['id']}_0.jpg"
 
-            # Actualitzem o creem el campió a la base de dades
             Champion.objects.update_or_create(
-                champion_id=champ_id,  # Usar el ID del campeón como identificador único
+                champion_id=champ_id,
                 defaults={
                     "name": name,
                     "role": role,
@@ -60,38 +53,8 @@ def champion_list(request: HttpRequest) -> HttpResponse:
                 }
             )
 
-        # Obtenim la llista de campions de la base de dades per mostrar-los
         champions = Champion.objects.all()
-
         return render(request, "champion_list.html", {"champions": champions})
 
     except requests.RequestException:
         return render(request, "champion_list.html", {"error": "Could not fetch the champion list."})
-
-
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
-
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # iniciar sesión automáticamente después del registro
-            return redirect('home')  # o donde quieras redirigir
-    else:
-        form = UserCreationForm()
-    return render(request, 'register.html', {'form': form})
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
-
-def home(request):
-    form = AuthenticationForm()
-    return render(request, 'home.html', {'form': form})
