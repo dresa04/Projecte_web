@@ -1,4 +1,9 @@
-<!-- home.html -->
+<!-- templates/home.html -->
+{% extends "base.html" %}
+
+{% block title %}Inicio - LoL Tracker{% endblock %}
+
+{% block content %}
 <h1>Bienvenido a League of Legends Tracker</h1>
 
 {% if user.is_authenticated %}
@@ -7,12 +12,8 @@
     {% csrf_token %}
     <button type="submit">Cerrar sesión</button>
   </form>
-{% else %}
-  <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
-{% endif %}
-{% if user.is_authenticated %}
   <p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
 {% else %}
-  <p><a href="{% url 'register' %}">Registrarse</a></p>
+  <p><a href="{% url 'login' %}">Iniciar sesión</a> | <a href="{% url 'register' %}">Registrarse</a></p>
 {% endif %}
-<p><a href="{% url 'champion_list' %}">Ver campeones</a></p>
+{% endblock %}

@@ -1,3 +1,9 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión - LoL Tracker{% endblock %}
+
+{% block content %}
 <h2>Iniciar sesión</h2>
 <form method="post">
     {% csrf_token %}
@@ -5,3 +11,4 @@
     <button type="submit">Iniciar sesión</button>
 </form>
 <p>¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate aquí</a></p>
+{% endblock %}
