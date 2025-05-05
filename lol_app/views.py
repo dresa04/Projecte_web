@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .models import Champion
+from .models import Champion, Review
 import requests
 from typing import Dict, Any
 from django.http import HttpRequest, HttpResponse
@@ -58,3 +58,16 @@ def champion_list(request: HttpRequest) -> HttpResponse:
 
     except requests.RequestException:
         return render(request, "champion_list.html", {"error": "Could not fetch the champion list."})
+
+
+@login_required
+def home(request: HttpRequest) -> HttpResponse:
+    """
+    Displays the main page with a list of all reviews.
+    Requires user to be logged in.
+    """
+    reviews = Review.objects.select_related('from_user', 'to_user').all()
+    context = {
+        'reviews': reviews
+    }
+    return render(request, 'home2.html', context)
