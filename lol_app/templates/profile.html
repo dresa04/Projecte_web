@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ user.username }}'s Profile</h1>
+    <hr>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">User Information</h5>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Date Joined:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+
+            <h5 class="card-title mt-4">LoL Profile</h5>
+             <p>
+                <strong>Main Champion:</strong>
+                {% if profile.main %}
+                    {{ profile.main.name }}
+                    <img src="{{ profile.main.image_url }}" alt="{{ profile.main.name }}" style="width: 50px; height: auto; vertical-align: middle; margin-left: 10px;">
+                {% else %}
+                    Not Set
+                {% endif %}
+            </p>
+            {# Add form here later to allow user to set/change main champion #}
+            {# <p><strong>Summoner Name:</strong> {{ profile.summoner_name|default:"Not Set" }}</p> #}
+
+            {# Add links/buttons for profile actions #}
+            <a href="{% url 'password_change' %}" class="btn btn-secondary">Change Password</a>
+            {# <a href="#" class="btn btn-primary">Edit Profile Details</a> #}
+
+        </div>
+    </div>
+
+    {# Add sections for reviews written by/about the user later #}
+    {# <h2 class="mt-5">Reviews Written By {{ user.username }}</h2> #}
+    {# Display list of reviews #}
+
+    {# <h2 class="mt-5">Reviews About {{ user.username }}</h2> #}
+    {# Display list of reviews #}
+
+</div>
+{% endblock %}

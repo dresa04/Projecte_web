@@ -3,12 +3,28 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .models import Champion
+from .models import Champion, Review
 import requests
 from typing import Dict, Any
 from django.http import HttpRequest, HttpResponse
 
-def home(request):
+@login_required # Make the home page require login
+def home(request: HttpRequest) -> HttpResponse:
+    """
+    Displays the main page with a list of all reviews.
+    Requires user to be logged in.
+    """
+    # Fetch all reviews from the database, ordered by timestamp (newest first)
+    # The ordering is defined in the Review model's Meta class
+    reviews = Review.objects.select_related('from_user', 'to_user').all()
+    context = {
+        'reviews': reviews
+    }
+    return render(request, 'home2.html', context)
+
+@login_required # Profile page should require login
+def profile(request: HttpRequest) -> HttpResponse:
+
     return render(request, 'home.html')
 
 def register(request):

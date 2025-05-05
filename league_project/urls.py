@@ -10,5 +10,7 @@ urlpatterns = [
     path("lol_app/", include("lol_app.urls")),  # Rutas de tu app
     path("login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(template_name="registration/logged_out.html"), name="logout"),
+    path('champions/', lol_views.champion_list, name='champion_list'),
+    path('profile/', lol_views.profile, name='profile'),
     path("register/", lol_views.register, name="register"),
 ]
