@@ -67,6 +67,7 @@ class Review(models.Model):
     title = models.CharField(max_length=100)
     body = models.TextField()
     to_user = models.ForeignKey(UserLOL, on_delete=models.CASCADE, related_name="reviews_received")
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
