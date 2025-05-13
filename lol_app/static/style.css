@@ -71,3 +71,24 @@ button:hover {
     max-width: 900px;
     margin: auto;
 }
+
+
+.review-box {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.review-box h5 {
+    margin-bottom: 10px;
+    color: #0a0a23;
+}
+
+.review-meta {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 10px;
+    text-align: right;
+}
