@@ -8,6 +8,27 @@ import requests
 from typing import Dict, Any
 from django.http import HttpRequest, HttpResponse
 
+import requests
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt # Use csrf_exempt for simplicity in API endpoint,
+                                                    # but be aware of implications or use csrf_protect
+                                                    # and pass CSRF token with JS.
+from django.views.decorators.http import require_http_methods
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Base URL for Riot Account V1 API (Global)
+RIOT_ACCOUNT_API_BASE_URL = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/' # Note: Americas is the region for Account-V1
+# Base URL for LoL Summoner V4 API (Regional)
+# You need to determine the correct regional endpoint (e.g., 'euw1', 'na1', 'kr', etc.)
+# based on the user's input or a default. For EUW, it's 'euw1'.
+RIOT_SUMMONER_API_BASE_URL = 'https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/'
+
+RIOT_API_KEY = settings.RIOT_API_KEY
+
+
 def home(request):
     return render(request, 'home.html')
 
@@ -113,3 +134,91 @@ def create_review(request):
     )
 
     return redirect('home')
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def validate_summoner(request):
+    """
+    Looks up a player using Riot ID (Game Name + Tag Line) via Riot API.
+    """
+    game_name = request.POST.get('game_name', '').strip()
+    tag_line = request.POST.get('tag_line', '').strip()
+    # tag_line_region = request.POST.get('tag_line_region', 'euw') # Example if you add region selector
+
+    if not game_name or not tag_line:
+        return JsonResponse({'exists': False, 'message': 'Game Name and Tag Line are required.'}, status=400)
+
+    headers = {
+        "X-Riot-Token": RIOT_API_KEY
+    }
+
+    try:
+        # --- Step 1: Get PUUID using Account V1 API ---
+        # Account V1 API is global, typically routed through 'americas' region gateway
+        account_api_url = f"{RIOT_ACCOUNT_API_BASE_URL}{game_name}/{tag_line}"
+        logger.info(f"Calling Account API: {account_api_url}")
+        account_response = requests.get(account_api_url, headers=headers)
+        account_response.raise_for_status() # Raise HTTPError for bad responses
+
+        account_data = account_response.json()
+        puuid = account_data.get('puuid')
+        # Get exact gameName and tagLine from API response
+        api_game_name = account_data.get('gameName')
+        api_tag_line = account_data.get('tagLine')
+
+
+        if not puuid:
+             # Should not happen if raise_for_status didn't throw, but as a safeguard
+             logger.error(f"PUUID not found in Account API response for {game_name}#{tag_line}")
+             return JsonResponse({'exists': False, 'message': 'PUUID not found in API response.'}, status=500)
+
+        # --- Step 2: Get Summoner Data using Summoner V4 API and PUUID ---
+        # Summoner V4 API is regional. You need to select the correct region base URL.
+        # For this example, hardcoding EUW1. You might need logic here.
+        summoner_api_url = f"{RIOT_SUMMONER_API_BASE_URL}{puuid}"
+        logger.info(f"Calling Summoner API (by PUUID): {summoner_api_url}")
+        summoner_response = requests.get(summoner_api_url, headers=headers)
+        summoner_response.raise_for_status() # Raise HTTPError again
+
+        summoner_data = summoner_response.json()
+
+        # If both calls succeeded, the player exists and we have their summoner data
+        return JsonResponse({
+            'exists': True,
+            'gameName': api_game_name, # Use the exact casing from API
+            'tagLine': api_tag_line, # Use the exact casing from API
+            'summonerLevel': summoner_data.get('summonerLevel'),
+            # You might want to return summonerId or puuid to store in your review model
+            # 'puuid': puuid,
+            # 'summonerId': summoner_data.get('id'),
+        })
+
+    except requests.exceptions.HTTPError as e:
+        # Handle specific API errors
+        logger.error(f"Riot API HTTP Error for {game_name}#{tag_line}: {e.response.status_code} - {e}")
+        if e.response.status_code == 404:
+            # 404 from Account API -> Riot ID not found
+            # 404 from Summoner API -> PUUID not found in that region (less likely if Account API worked)
+            message = f"Riot ID '{game_name}#{tag_line}' not found." # Default message
+            # You might refine this based on which API call failed if needed
+            return JsonResponse({'exists': False, 'message': message}, status=404)
+        elif e.response.status_code == 429:
+             logger.warning(f"Riot API Rate Limit Exceeded for {game_name}#{tag_line}")
+             return JsonResponse({'exists': False, 'message': 'API rate limit exceeded. Try again shortly.'}, status=429)
+        elif e.response.status_code == 403:
+             logger.error(f"Riot API Forbidden for {game_name}#{tag_line} - Check API Key/Region: {e}")
+             return JsonResponse({'exists': False, 'message': 'API key invalid or restricted.'}, status=403)
+        else:
+            logger.error(f"Unhandled Riot API HTTP Error for {game_name}#{tag_line}: {e.response.status_code}")
+            return JsonResponse({'exists': False, 'message': f'An API error occurred ({e.response.status_code}).'}, status=e.response.status_code)
+
+    except requests.exceptions.RequestException as e:
+        # Network errors, timeouts, etc.
+        logger.error(f"Riot API Request Exception for {game_name}#{tag_line}: {e}")
+        return JsonResponse({'exists': False, 'message': 'Could not connect to Riot API.'}, status=500)
+
+    except Exception as e:
+        # Catch any other unexpected errors
+        logger.error(f"Unexpected error in validate_summoner for {game_name}#{tag_line}: {e}", exc_info=True)
+        return JsonResponse({'exists': False, 'message': 'An internal server error occurred.'}, status=500)
