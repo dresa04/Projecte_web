@@ -1,38 +1,40 @@
-{% extends "base2.html" %}
+{% extends "base.html" %}
 
 {% block title %}Home - Reviews{% endblock %}
 
 {% block content %}
-{% load static %}
-
-<div class="container mt-4">
+<div class="container">
     <h1>Player Reviews</h1>
     <hr>
 
     {% if reviews %}
         {% for review in reviews %}
-        <div class="card review-card">
-            <div class="card-header">
-                Review for <strong>{{ review.to_user.username }}</strong> by <strong>{{ review.from_user.username }}</strong>
-            </div>
-            <div class="card-body">
-                <h5 class="card-title">{{ review.title }}</h5>
-                <p class="card-text">{{ review.body|linebreaksbr }}</p> {# Use linebreaksbr to respect newlines #}
-            </div>
-            <div class="card-footer text-muted">
-                Posted on {{ review.timestamp|date:"F d, Y, P" }} {# Format timestamp nicely #}
-                {# Add Edit/Delete buttons here later, checking permissions #}
-                {# {% if review.from_user == request.user %} #}
-                {#   <a href="#" class="btn btn-sm btn-secondary">Edit</a> #}
-                {#   <a href="#" class="btn btn-sm btn-danger">Delete</a> #}
-                {# {% endif %} #}
+        <div class="review-box">
+            <p><strong>Review for {{ review.to_user.username }}</strong> by <strong>{{ review.from_user.username }}</strong></p>
+            <h5>{{ review.title }}</h5>
+            <p>{{ review.body|linebreaksbr }}</p>
+            <div class="review-meta">
+                Posted on {{ review.timestamp|date:"F d, Y, P" }}
             </div>
         </div>
         {% endfor %}
     {% else %}
         <p>No reviews have been posted yet. Be the first!</p>
-        {# Add a link to create a review here later #}
-        {# <a href="#" class="btn btn-primary">Write a Review</a> #}
     {% endif %}
+
+    <!-- Ancla para el botón "Crear" del menú -->
+    <div id="review-create"></div>
+
+    <hr>
+    <h2>Escribe una nueva reseña</h2>
+
+    <!-- Formulario visible directamente -->
+    <form method="POST" action="{% url 'create_review' %}">
+        {% csrf_token %}
+        <input type="text" name="to_summoner_name" placeholder="Nombre del jugador" required><br>
+        <input type="text" name="title" placeholder="Título de la reseña" required><br>
+        <textarea name="body" placeholder="Escribe tu reseña aquí" required></textarea><br>
+        <button type="submit">Enviar reseña</button>
+    </form>
 </div>
 {% endblock %}

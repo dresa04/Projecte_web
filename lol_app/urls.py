@@ -8,4 +8,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),
+    path('reviews/update/', views.review_update_list, name='review_update_list'),
+    path('reviews/delete/', views.review_delete_list, name='review_delete_list'),
+    path('create-review/', views.create_review, name='create_review'),
+
 ]
