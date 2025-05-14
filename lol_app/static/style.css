@@ -201,13 +201,15 @@ button:hover {
 .dropbtn {
     background-color: #4fc3f7;
     color: #0a0a23;
-    padding: 8px 14px;
+    padding: 12px 18px; /* Aumenta padding */
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 1rem; /* más fácil de leer y clicar */
 }
+
 
 .dropbtn:hover {
     background-color: #039be5;
@@ -224,7 +226,6 @@ button:hover {
     z-index: 10;
     border-radius: 5px;
     overflow: hidden;
-    margin-top: 5px;
 }
 
 .dropdown-content a {
@@ -238,6 +239,10 @@ button:hover {
 .dropdown-content a:hover {
     background-color: #f0f0f0;
 }
+.dropdown-content {
+    margin-top: 0; /* ligeramente mayor separación */
+}
+
 
 .dropdown-inline:hover .dropdown-content {
     display: block;
