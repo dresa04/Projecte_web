@@ -1,17 +1,17 @@
-/* style.css - Guía de estilos para League of Legends Tracker */
-
-/* Fuentes y colores base */
+/* --------------------------------------
+   Base visual: fuente, colores, fondo
+----------------------------------------- */
 body {
     font-family: 'Poppins', sans-serif;
-    background-color: #f5f5f5; /* Fondo claro para mejor contraste con el logo */
-    color: #0a0a23; /* Texto oscuro para buena legibilidad */
+    background-color: #f5f5f5;
+    color: #0a0a23;
     margin: 0;
     padding: 0;
     min-height: 100vh;
 }
 
 h1, h2 {
-    color: #f0c420; /* Dorado inspirado en LoL */
+    color: #f0c420;
     text-align: center;
     margin-top: 20px;
 }
@@ -21,7 +21,7 @@ p, a, label {
 }
 
 a {
-    color: #4fc3f7; /* Azul brillante */
+    color: #4fc3f7;
     text-decoration: none;
 }
 
@@ -29,7 +29,9 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Formularios */
+/* --------------------------------------
+   Formularios
+----------------------------------------- */
 form {
     max-width: 400px;
     margin: 30px auto;
@@ -65,14 +67,18 @@ button:hover {
     background-color: #039be5;
 }
 
-/* Contenedor de contenido */
+/* --------------------------------------
+   Contenedor principal
+----------------------------------------- */
 .container {
     padding: 20px;
     max-width: 900px;
     margin: auto;
 }
 
-
+/* --------------------------------------
+   Review box (tarjetas de reseñas)
+----------------------------------------- */
 .review-box {
     background-color: #ffffff;
     border-radius: 10px;
@@ -93,6 +99,9 @@ button:hover {
     text-align: right;
 }
 
+/* --------------------------------------
+   Lista de campeones
+----------------------------------------- */
 .champion-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -119,50 +128,143 @@ button:hover {
     margin-bottom: 10px;
 }
 
+/* --------------------------------------
+   Barra de navegación
+----------------------------------------- */
 .navbar {
     background-color: #0a0a23;
     padding: 10px 20px;
     display: flex;
-    justify-content: center;
-    color: #ffffff;
+    align-items: center;
+    position: relative;
 }
 
-.nav-container {
-    width: 100%;
-    max-width: 1000px;
+.nav-left-fixed {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
-    justify-content: space-between;
 }
 
 .nav-logo {
-    font-weight: bold;
-    font-size: 1.2rem;
     display: flex;
     align-items: center;
     color: #f0c420;
+    font-weight: bold;
+    font-size: 1.2rem;
     text-decoration: none;
 }
 
 .nav-logo img {
-    margin-right: 10px;
+    margin-right: 8px;
 }
 
-.nav-center a,
-.nav-right a {
-    margin-left: 15px;
+.nav-center-group {
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-center-group a {
     color: #ffffff;
     text-decoration: none;
     font-weight: bold;
 }
 
-.nav-center a:hover,
-.nav-right a:hover {
+.nav-center-group a:hover {
     color: #f0c420;
 }
 
+.nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .nav-user {
-    margin-right: 10px;
-    font-weight: bold;
     color: #f0c420;
+    font-weight: bold;
+}
+
+/* --------------------------------------
+   Dropdown menu para "Reviews"
+----------------------------------------- */
+.dropdown-inline {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: #4fc3f7;
+    color: #0a0a23;
+    padding: 8px 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.dropbtn:hover {
+    background-color: #039be5;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #ffffff;
+    min-width: 160px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.dropdown-content a {
+    color: #0a0a23;
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.dropdown-content a:hover {
+    background-color: #f0f0f0;
+}
+
+.dropdown-inline:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-inline:hover .dropbtn {
+    background-color: #039be5;
+}
+
+/* --------------------------------------
+   Responsive básico
+----------------------------------------- */
+@media (max-width: 768px) {
+    .nav-center-group {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .nav-left-fixed {
+        position: static;
+        transform: none;
+        margin-right: auto;
+    }
+
+    .nav-right {
+        margin-left: 0;
+        gap: 10px;
+    }
 }

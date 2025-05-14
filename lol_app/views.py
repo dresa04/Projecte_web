@@ -71,3 +71,45 @@ def home(request: HttpRequest) -> HttpResponse:
         'reviews': reviews
     }
     return render(request, 'home2.html', context)
+
+
+@login_required
+def review_update_list(request):
+    reviews = Review.objects.filter(from_user=request.user)
+    return render(request, "review_update_list.html", {"reviews": reviews})
+
+@login_required
+def review_delete_list(request):
+    reviews = Review.objects.filter(from_user=request.user)
+    return render(request, "review_delete_list.html", {"reviews": reviews})
+
+
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import redirect
+from .models import UserLOL, Review
+
+@require_POST
+@login_required
+def create_review(request):
+    summoner_name = request.POST.get('to_summoner_name')
+    title = request.POST.get('title')
+    body = request.POST.get('body')
+
+    if not (summoner_name and title and body):
+        return redirect('home')
+
+    # Simula creación de UserLOL sin API
+    userlol, _ = UserLOL.objects.get_or_create(
+        username=summoner_name,
+        defaults={'email': f'{summoner_name}@fake.com', 'main': None}
+    )
+
+    Review.objects.create(
+        title=title,
+        body=body,
+        to_user=userlol,
+        from_user=request.user
+    )
+
+    return redirect('home')
