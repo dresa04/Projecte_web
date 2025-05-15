@@ -16,5 +16,9 @@ urlpatterns = [
     path('api/get-matches/', views.get_matches_for_player, name='get_matches'),
     path('reviews/update/', views.review_update_list, name='review_update_list'),
     path('reviews/update/<int:pk>/', views.review_update, name='review_update'),
+    path('reviews/delete/',        views.review_delete_list,    name='review_delete_list'),
+    path('reviews/delete/<int:pk>/', views.review_delete,       name='review_delete'),
+    # opcional:
+    path('reviews/delete/<int:pk>/confirm/', views.review_confirm_delete, name='review_confirm_delete'),
 
 ]

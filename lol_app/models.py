@@ -51,6 +51,13 @@ class UserLOL(models.Model):
         """
         return self.username
 
+from django.db import models
+from django.utils import timezone
+
+class ActiveReviewManager(models.Manager):
+    """Manager que solo devuelve reseñas no eliminadas."""
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
 
 class Review(models.Model):
     """
@@ -62,23 +69,39 @@ class Review(models.Model):
         body (str): Content of the review.
         to_user (UserLOL): User to whom the review is directed.
         timestamp (datetime): Date and time when the review was created.
+        is_deleted (bool): Flag de soft delete.
+        deleted_at (datetime): Fecha en que se marcó como eliminada.
     """
-    review_id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=100)
-    body = models.TextField()
-    to_user = models.ForeignKey(UserLOL, on_delete=models.CASCADE, related_name="reviews_received")
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews_written")
-    match = models.ForeignKey('Match', on_delete=models.SET_NULL, null=True, blank=True, related_name="reviews")
-    timestamp = models.DateTimeField(auto_now_add=True)
+    review_id    = models.AutoField(primary_key=True)
+    title        = models.CharField(max_length=100)
+    body         = models.TextField()
+    to_user      = models.ForeignKey('UserLOL', on_delete=models.CASCADE, related_name="reviews_received")
+    from_user    = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name="reviews_written")
+    match        = models.ForeignKey('Match', on_delete=models.SET_NULL, null=True, blank=True, related_name="reviews")
+    timestamp    = models.DateTimeField(auto_now_add=True)
+
+    # Campos para soft-delete
+    is_deleted   = models.BooleanField(default=False)
+    deleted_at   = models.DateTimeField(null=True, blank=True)
+
+    # Managers
+    objects      = ActiveReviewManager()  # Por defecto solo activas
+    all_objects  = models.Manager()       # Incluye también las borradas
+
+    def delete(self, using=None, keep_parents=False):
+        """
+        Soft delete: marca la reseña como eliminada en lugar de borrarla.
+        """
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
 
     def __str__(self):
         """
         Returns a string representation of the review.
-
-        Returns:
-            str: Review title and the user it is addressed to.
         """
         return f"Review #{self.review_id} for {self.to_user.username} - {self.title}"
+
 
 
 class Match(models.Model):

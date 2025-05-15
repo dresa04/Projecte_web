@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Eliminar reseñas{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Eliminar mis reseñas</h1>
+  <hr>
+
+  {% if reviews %}
+    <div class="reviews-list">
+      {% for review in reviews %}
+      <div class="review-box">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="mb-2">{{ review.title }}</h5>
+            <p class="mb-1">{{ review.body|truncatewords:20 }}{% if review.body|length > 100 %}…{% endif %}</p>
+            <small class="review-meta">
+              para <strong>{{ review.to_user.username }}</strong> — {{ review.timestamp|date:"Y-m-d H:i" }}
+            </small>
+          </div>
+          <form method="post" action="{% url 'review_delete' review.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No tienes reseñas para eliminar.</p>
+  {% endif %}
+</div>
+{% endblock %}

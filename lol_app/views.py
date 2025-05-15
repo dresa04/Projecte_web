@@ -91,7 +91,9 @@ def home(request: HttpRequest) -> HttpResponse:
     Displays the main page with a list of all reviews.
     Requires user to be logged in.
     """
-    reviews = Review.objects.select_related('from_user', 'to_user').all()
+    reviews = Review.objects.all()  # omite las borradas
+    # o para sólo tus reseñas:
+    reviews = Review.objects.filter(from_user=request.user)
     context = {
         'reviews': reviews
     }
@@ -446,3 +448,20 @@ def review_update(request, pk):
         return redirect('review_update_list')
 
     return render(request, 'review_update.html', {'review': review})
+
+
+@login_required
+@require_POST
+def review_delete(request, pk):
+    review = get_object_or_404(Review.all_objects, pk=pk, from_user=request.user)
+    review.delete()    # esto marca is_deleted=True
+    return redirect('review_delete_list')
+
+@login_required
+def review_confirm_delete(request, pk):
+    review = get_object_or_404(Review.all_objects, pk=pk, from_user=request.user)
+    if request.method == 'POST':
+        review.delete()
+        return redirect('review_delete_list')
+    return render(request, 'review_confirm_delete.html', {'review': review})
+
