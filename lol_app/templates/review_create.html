@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Crear Reseña{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Crear nueva reseña</h1>
+    <hr>
+
+    {% if form_error %}
+        <div style="color: red; margin-bottom: 15px;">{{ form_error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'create_review' %}">
+        {% csrf_token %}
+        <div>
+            <input type="text" name="player_id_input" id="id_player_id_input"
+                   placeholder="Riot ID (GameName#TagLine)"
+                   value="{{ submitted_player_id_input|default:'' }}" required>
+            <div id="summoner_feedback" style="margin-top: 5px; font-size: 0.9em;"></div>
+        </div>
+        <br>
+        <input type="text" name="title" placeholder="Título de la reseña" value="{{ submitted_title|default:'' }}" required><br>
+        <textarea name="body" placeholder="Escribe tu reseña aquí" required>{{ submitted_body|default:'' }}</textarea><br>
+        <button type="submit">Enviar reseña</button>
+    </form>
+</div>
+
+<script>
+const playerIdInput = document.getElementById('id_player_id_input');
+const summonerFeedbackDiv = document.getElementById('summoner_feedback');
+const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+let typingTimer;
+const doneTypingInterval = 700;
+
+playerIdInput.addEventListener('input', () => {
+    clearTimeout(typingTimer);
+    const inputValue = playerIdInput.value.trim();
+    if (inputValue.includes('#') && inputValue.split('#').length === 2) {
+         typingTimer = setTimeout(validatePlayerId, doneTypingInterval);
+    } else {
+         summonerFeedbackDiv.textContent = 'Enter a Riot ID (GameName#TagLine)';
+         summonerFeedbackDiv.style.color = '#888';
+    }
+});
+
+function validatePlayerId() {
+    const playerId = playerIdInput.value.trim();
+    const parts = playerId.split('#');
+    if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+        summonerFeedbackDiv.textContent = 'Invalid format. Use GameName#TagLine.';
+        summonerFeedbackDiv.style.color = 'red';
+        return;
+    }
+
+    const gameName = parts[0].trim();
+    const tagLine = parts[1].trim();
+    summonerFeedbackDiv.textContent = 'Searching Riot ID...';
+    summonerFeedbackDiv.style.color = '#888';
+
+    fetch("{% url 'validate_summoner' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: new URLSearchParams({
+            'game_name': gameName,
+            'tag_line': tagLine
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || `HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.exists) {
+            summonerFeedbackDiv.textContent = `Riot ID found: ${data.gameName}#${data.tagLine} (Level ${data.summonerLevel})`;
+            summonerFeedbackDiv.style.color = 'green';
+        } else {
+            summonerFeedbackDiv.textContent = data.message || 'Riot ID not found.';
+            summonerFeedbackDiv.style.color = 'red';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching Riot ID data:', error);
+        let errorMessage = 'Error checking Riot ID.';
+        if (error.message.includes('404')) {
+            errorMessage = 'Riot ID not found.';
+        } else if (error.message.includes('429')) {
+            errorMessage = 'Too many requests. Try again shortly.';
+        } else if (error.message.includes('API key invalid')) {
+            errorMessage = 'API key invalid or restricted.';
+        } else if (error.message.includes('An API error occurred')) {
+            errorMessage = error.message;
+        }
+        summonerFeedbackDiv.textContent = errorMessage;
+        summonerFeedbackDiv.style.color = 'red';
+    });
+}
+</script>
+{% endblock %}

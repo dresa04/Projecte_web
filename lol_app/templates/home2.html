@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %} {# Load static tag if you put JS in a separate file #}
+{% load static %}
 
 {% block title %}Home - Reviews{% endblock %}
 
@@ -11,7 +11,6 @@
     {% if reviews %}
         {% for review in reviews %}
         <div class="review-box">
-            {# Asumiendo que tu modelo Review ahora guarda gameName y tagLine #}
             <p><strong>Review for {{ review.to_player_game_name }}#{{ review.to_player_tag_line }}</strong> by <strong>{{ review.from_user }}</strong></p>
             <h5>{{ review.title }}</h5>
             <p>{{ review.body|linebreaksbr }}</p>
@@ -23,142 +22,5 @@
     {% else %}
         <p>No reviews have been posted yet. Be the first!</p>
     {% endif %}
-
-    <!-- Ancla para el botón "Crear" del menú -->
-    <div id="review-create"></div>
-
-    <hr>
-    <h2>Escribe una nueva reseña</h2>
-
-    {# Display form error if any (from server-side re-validation) #}
-    {% if form_error %}
-        <div style="color: red; margin-bottom: 15px;">{{ form_error }}</div>
-    {% endif %}
-
-    <!-- Formulario visible directamente -->
-    <form method="POST" action="{% url 'create_review' %}">
-        {% csrf_token %}
-
-        <div>
-            {# Manteniendo un solo input visualmente #}
-            <input type="text" name="player_id_input" id="id_player_id_input"
-                   placeholder="Riot ID (GameName#TagLine)" {# Placeholder actualizado para guiar al usuario #}
-                   value="{{ submitted_player_id_input|default:'' }}" {# Retain value on error #}
-                   required>
-            <div id="summoner_feedback" style="margin-top: 5px; font-size: 0.9em;">
-                <!-- Feedback will appear here -->
-            </div>
-        </div>
-        <br>
-        <input type="text" name="title" placeholder="Título de la reseña" value="{{ submitted_title|default:'' }}" required><br>
-        <textarea name="body" placeholder="Escribe tu reseña aquí" required>{{ submitted_body|default:'' }}</textarea><br>
-        <button type="submit">Enviar reseña</button>
-    </form>
 </div>
-
-<script>
-    // Get elements
-    const playerIdInput = document.getElementById('id_player_id_input'); // Updated ID
-    const summonerFeedbackDiv = document.getElementById('summoner_feedback');
-    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value; // Get CSRF token
-
-    let typingTimer; // Timer identifier
-    const doneTypingInterval = 700; // Time in ms, 0.7 second
-
-    // On input change, start the timer
-    playerIdInput.addEventListener('input', () => { // Use 'input' event for smoother handling of copy/paste etc.
-        clearTimeout(typingTimer); // Clear previous timer
-        const inputValue = playerIdInput.value.trim();
-
-        // Only start timer if the input looks like it might be a Riot ID (contains '#')
-        if (inputValue.includes('#') && inputValue.split('#').length === 2) {
-             typingTimer = setTimeout(validatePlayerId, doneTypingInterval); // Set new timer
-        } else {
-             // Clear feedback if format is clearly wrong or incomplete
-             summonerFeedbackDiv.textContent = 'Enter a Riot ID (GameName#TagLine)';
-             summonerFeedbackDiv.style.color = '#888';
-        }
-    });
-
-
-    // Function to perform the validation lookup
-    function validatePlayerId() {
-        const playerId = playerIdInput.value.trim();
-
-        // Basic format validation (GameName#TagLine)
-        const parts = playerId.split('#');
-        if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
-            summonerFeedbackDiv.textContent = 'Invalid format. Use GameName#TagLine.';
-            summonerFeedbackDiv.style.color = 'red';
-            return;
-        }
-
-        const gameName = parts[0].trim();
-        const tagLine = parts[1].trim();
-
-        // Clear previous feedback
-        summonerFeedbackDiv.textContent = '';
-        summonerFeedbackDiv.style.color = ''; // Reset color
-
-        // Indicate loading
-        summonerFeedbackDiv.textContent = 'Searching Riot ID...';
-        summonerFeedbackDiv.style.color = '#888'; // Grey text
-
-        // Make the AJAX request to your Django view
-        fetch("{% url 'validate_summoner' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrfToken // Include CSRF token for POST requests
-            },
-            // SEND GAME NAME AND TAG LINE SEPARATELY
-            body: new URLSearchParams({
-                'game_name': gameName,
-                'tag_line': tagLine
-                // Add 'tag_line_region' if you add a selector and handle it in backend
-            })
-        })
-        .then(response => {
-            // Handle HTTP errors first
-            if (!response.ok) {
-                // If response is not ok, parse JSON anyway to get potential error message
-                 return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status}`); });
-            }
-            // If response is ok, parse JSON
-            return response.json();
-        })
-        .then(data => {
-            // Update feedback based on the JSON response
-            if (data.exists) {
-                // Display the found Game Name and Tag Line (they might be slightly different casing from API)
-                // and other info like level
-                summonerFeedbackDiv.textContent = `Riot ID found: ${data.gameName}#${data.tagLine} (Level ${data.summonerLevel})`;
-                summonerFeedbackDiv.style.color = 'green';
-            } else {
-                // This branch might not be reached if 404 is thrown as an error,
-                // but good to have a fallback if the server sends {exists: false} with 200
-                summonerFeedbackDiv.textContent = data.message || 'Riot ID not found.';
-                summonerFeedbackDiv.style.color = 'red';
-            }
-        })
-        .catch(error => {
-            // Handle network errors or errors thrown in the .then() block (like HTTP errors)
-            console.error('Error fetching Riot ID data:', error);
-            let errorMessage = 'Error checking Riot ID.';
-            // Customize error messages based on potential responses from your Django view
-            if (error.message.includes('404')) {
-                errorMessage = 'Riot ID not found.';
-            } else if (error.message.includes('429')) {
-                 errorMessage = 'Too many requests. Try again shortly.';
-            } else if (error.message.includes('API key invalid')) {
-                 errorMessage = 'API key invalid or restricted.'; // From your Django view
-            } else if (error.message.includes('An API error occurred')) {
-                 errorMessage = error.message; // Use message from server if available
-            }
-            summonerFeedbackDiv.textContent = errorMessage;
-            summonerFeedbackDiv.style.color = 'red';
-        });
-    }
-</script>
-
 {% endblock %}

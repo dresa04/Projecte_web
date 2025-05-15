@@ -2,6 +2,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import login_required
 from .models import Champion, Review
 import requests
@@ -222,3 +224,9 @@ def validate_summoner(request):
         # Catch any other unexpected errors
         logger.error(f"Unexpected error in validate_summoner for {game_name}#{tag_line}: {e}", exc_info=True)
         return JsonResponse({'exists': False, 'message': 'An internal server error occurred.'}, status=500)
+
+
+
+@login_required
+def review_create_form(request):
+        return render(request, 'review_create.html')

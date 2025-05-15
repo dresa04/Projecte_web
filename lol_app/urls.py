@@ -12,5 +12,7 @@ urlpatterns = [
     path('reviews/delete/', views.review_delete_list, name='review_delete_list'),
     path('api/validate-summoner/', views.validate_summoner, name='validate_summoner'),
     path('create-review/', views.create_review, name='create_review'),
+    path('reviews/create/', views.review_create_form, name='review_create_form'),
+
 
 ]
