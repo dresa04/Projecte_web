@@ -9,99 +9,149 @@
     <hr>
 
     {% if form_error %}
-        <div style="color: red; margin-bottom: 15px;">{{ form_error }}</div>
+        <div class="alert alert-danger">{{ form_error }}</div>
     {% endif %}
 
     <form method="POST" action="{% url 'create_review' %}">
         {% csrf_token %}
-        <div>
-            <input type="text" name="player_id_input" id="id_player_id_input"
-                   placeholder="Riot ID (GameName#TagLine)"
-                   value="{{ submitted_player_id_input|default:'' }}" required>
-            <div id="summoner_feedback" style="margin-top: 5px; font-size: 0.9em;"></div>
+
+        <!-- Riot ID Input -->
+        <div class="form-group">
+            <label for="id_player_id_input">Riot ID (GameName#TagLine)</label>
+            <input
+                type="text"
+                name="player_id_input"
+                id="id_player_id_input"
+                class="form-control"
+                placeholder="Ejemplo: Faker#KR"
+                value="{{ submitted_player_id_input|default:'' }}"
+                required
+            >
+            <small id="summoner_feedback" class="form-text text-muted"></small>
         </div>
-        <br>
-        <input type="text" name="title" placeholder="Título de la reseña" value="{{ submitted_title|default:'' }}" required><br>
-        <textarea name="body" placeholder="Escribe tu reseña aquí" required>{{ submitted_body|default:'' }}</textarea><br>
-        <button type="submit">Enviar reseña</button>
+
+        <!-- Match Select: oculto hasta cargar partidas -->
+        <div class="form-group" id="match_select_container" style="display: none; margin-top: 1rem;">
+            <label for="match_id">Selecciona una partida</label>
+            <select name="match_id" id="match_id" class="form-control" required>
+                <option value="">Cargando partidas...</option>
+            </select>
+        </div>
+
+        <!-- Título y cuerpo de la reseña -->
+        <div class="form-group mt-3">
+            <label for="id_title">Título de la reseña</label>
+            <input
+                type="text"
+                name="title"
+                id="id_title"
+                class="form-control"
+                placeholder="Título de la reseña"
+                value="{{ submitted_title|default:'' }}"
+                required
+            >
+        </div>
+
+        <div class="form-group mt-2">
+            <label for="id_body">Contenido de la reseña</label>
+            <textarea
+                name="body"
+                id="id_body"
+                class="form-control"
+                placeholder="Escribe tu reseña aquí"
+                rows="4"
+                required
+            >{{ submitted_body|default:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Enviar reseña</button>
     </form>
 </div>
 
+<!-- Muevo el script dentro del bloque content para que se cargue -->
 <script>
-const playerIdInput = document.getElementById('id_player_id_input');
-const summonerFeedbackDiv = document.getElementById('summoner_feedback');
-const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-let typingTimer;
-const doneTypingInterval = 700;
+(function(){
+    const playerIdInput = document.getElementById('id_player_id_input');
+    const summonerFeedback = document.getElementById('summoner_feedback');
+    const matchContainer = document.getElementById('match_select_container');
+    const matchSelect = document.getElementById('match_id');
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
-playerIdInput.addEventListener('input', () => {
-    clearTimeout(typingTimer);
-    const inputValue = playerIdInput.value.trim();
-    if (inputValue.includes('#') && inputValue.split('#').length === 2) {
-         typingTimer = setTimeout(validatePlayerId, doneTypingInterval);
-    } else {
-         summonerFeedbackDiv.textContent = 'Enter a Riot ID (GameName#TagLine)';
-         summonerFeedbackDiv.style.color = '#888';
-    }
-});
+    let typingTimer;
+    const doneTypingInterval = 700;
 
-function validatePlayerId() {
-    const playerId = playerIdInput.value.trim();
-    const parts = playerId.split('#');
-    if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
-        summonerFeedbackDiv.textContent = 'Invalid format. Use GameName#TagLine.';
-        summonerFeedbackDiv.style.color = 'red';
-        return;
-    }
-
-    const gameName = parts[0].trim();
-    const tagLine = parts[1].trim();
-    summonerFeedbackDiv.textContent = 'Searching Riot ID...';
-    summonerFeedbackDiv.style.color = '#888';
-
-    fetch("{% url 'validate_summoner' %}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': csrfToken
-        },
-        body: new URLSearchParams({
-            'game_name': gameName,
-            'tag_line': tagLine
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.message || `HTTP error! status: ${response.status}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.exists) {
-            summonerFeedbackDiv.textContent = `Riot ID found: ${data.gameName}#${data.tagLine} (Level ${data.summonerLevel})`;
-            summonerFeedbackDiv.style.color = 'green';
+    playerIdInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        const val = playerIdInput.value.trim();
+        matchContainer.style.display = 'none';
+        if (val.includes('#') && val.split('#').length === 2) {
+            summonerFeedback.textContent = '';
+            typingTimer = setTimeout(() => validatePlayerId(val), doneTypingInterval);
         } else {
-            summonerFeedbackDiv.textContent = data.message || 'Riot ID not found.';
-            summonerFeedbackDiv.style.color = 'red';
+            summonerFeedback.textContent = 'Formato: GameName#TagLine';
+            summonerFeedback.style.color = '#888';
         }
-    })
-    .catch(error => {
-        console.error('Error fetching Riot ID data:', error);
-        let errorMessage = 'Error checking Riot ID.';
-        if (error.message.includes('404')) {
-            errorMessage = 'Riot ID not found.';
-        } else if (error.message.includes('429')) {
-            errorMessage = 'Too many requests. Try again shortly.';
-        } else if (error.message.includes('API key invalid')) {
-            errorMessage = 'API key invalid or restricted.';
-        } else if (error.message.includes('An API error occurred')) {
-            errorMessage = error.message;
-        }
-        summonerFeedbackDiv.textContent = errorMessage;
-        summonerFeedbackDiv.style.color = 'red';
     });
-}
+
+    function validatePlayerId(inputVal) {
+        const [gameName, tagLine] = inputVal.split('#').map(s => s.trim());
+        if (!gameName || !tagLine) {
+            summonerFeedback.textContent = 'Formato inválido.';
+            summonerFeedback.style.color = 'red';
+            return;
+        }
+        summonerFeedback.textContent = 'Buscando Riot ID…';
+        summonerFeedback.style.color = '#888';
+
+        fetch("{% url 'validate_summoner' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrfToken
+            },
+            body: new URLSearchParams({ game_name: gameName, tag_line: tagLine })
+        })
+        .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
+        .then(data => {
+            if (!data.exists) throw new Error(data.message || 'No encontrado');
+            summonerFeedback.textContent = `Encontrado: ${data.gameName}#${data.tagLine} (Nv. ${data.summonerLevel})`;
+            summonerFeedback.style.color = 'green';
+
+            return fetch("{% url 'get_matches' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken
+                },
+                body: new URLSearchParams({ puuid: data.puuid })
+            });
+        })
+        .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
+        .then(matchData => {
+            matchSelect.innerHTML = '';
+            if (Array.isArray(matchData.matches) && matchData.matches.length) {
+                matchData.matches.forEach(m => {
+                    const opt = document.createElement('option');
+                    const date = new Date(m.timestamp);
+                    opt.value = m.id;
+                    opt.text = `${m.gameMode} – ${date.toLocaleDateString()} – ${Math.round(m.duration/60)} min`;
+                    matchSelect.append(opt);
+                });
+            } else {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.text = 'No se encontraron partidas';
+                matchSelect.append(opt);
+            }
+            matchContainer.style.display = 'block';
+        })
+        .catch(err => {
+            console.error(err);
+            summonerFeedback.textContent = err.message || 'Error al buscar.';
+            summonerFeedback.style.color = 'red';
+            matchContainer.style.display = 'none';
+        });
+    }
+})();
 </script>
 {% endblock %}
