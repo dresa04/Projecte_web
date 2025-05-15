@@ -146,7 +146,6 @@ def validate_summoner(request):
     """
     game_name = request.POST.get('game_name', '').strip()
     tag_line = request.POST.get('tag_line', '').strip()
-    # tag_line_region = request.POST.get('tag_line_region', 'euw') # Example if you add region selector
 
     if not game_name or not tag_line:
         return JsonResponse({'exists': False, 'message': 'Game Name and Tag Line are required.'}, status=400)
@@ -156,72 +155,55 @@ def validate_summoner(request):
     }
 
     try:
-        # --- Step 1: Get PUUID using Account V1 API ---
-        # Account V1 API is global, typically routed through 'americas' region gateway
+        # Step 1: Get PUUID using Account V1 API
         account_api_url = f"{RIOT_ACCOUNT_API_BASE_URL}{game_name}/{tag_line}"
         logger.info(f"Calling Account API: {account_api_url}")
         account_response = requests.get(account_api_url, headers=headers)
-        account_response.raise_for_status() # Raise HTTPError for bad responses
+        account_response.raise_for_status()
 
         account_data = account_response.json()
         puuid = account_data.get('puuid')
-        # Get exact gameName and tagLine from API response
         api_game_name = account_data.get('gameName')
-        api_tag_line = account_data.get('tagLine')
-
+        api_tag_line  = account_data.get('tagLine')
 
         if not puuid:
-             # Should not happen if raise_for_status didn't throw, but as a safeguard
-             logger.error(f"PUUID not found in Account API response for {game_name}#{tag_line}")
-             return JsonResponse({'exists': False, 'message': 'PUUID not found in API response.'}, status=500)
+            logger.error(f"PUUID not found in Account API response for {game_name}#{tag_line}")
+            return JsonResponse({'exists': False, 'message': 'PUUID not found in API response.'}, status=500)
 
-        # --- Step 2: Get Summoner Data using Summoner V4 API and PUUID ---
-        # Summoner V4 API is regional. You need to select the correct region base URL.
-        # For this example, hardcoding EUW1. You might need logic here.
+        # Step 2: Get Summoner Data using Summoner V4 API and PUUID
         summoner_api_url = f"{RIOT_SUMMONER_API_BASE_URL}{puuid}"
         logger.info(f"Calling Summoner API (by PUUID): {summoner_api_url}")
         summoner_response = requests.get(summoner_api_url, headers=headers)
-        summoner_response.raise_for_status() # Raise HTTPError again
+        summoner_response.raise_for_status()
 
         summoner_data = summoner_response.json()
 
-        # If both calls succeeded, the player exists and we have their summoner data
+        # Return includes puuid now
         return JsonResponse({
             'exists': True,
-            'gameName': api_game_name, # Use the exact casing from API
-            'tagLine': api_tag_line, # Use the exact casing from API
+            'gameName': api_game_name,
+            'tagLine': api_tag_line,
             'summonerLevel': summoner_data.get('summonerLevel'),
-            # You might want to return summonerId or puuid to store in your review model
-            # 'puuid': puuid,
-            # 'summonerId': summoner_data.get('id'),
+            'puuid': puuid,
         })
 
     except requests.exceptions.HTTPError as e:
-        # Handle specific API errors
         logger.error(f"Riot API HTTP Error for {game_name}#{tag_line}: {e.response.status_code} - {e}")
-        if e.response.status_code == 404:
-            # 404 from Account API -> Riot ID not found
-            # 404 from Summoner API -> PUUID not found in that region (less likely if Account API worked)
-            message = f"Riot ID '{game_name}#{tag_line}' not found." # Default message
-            # You might refine this based on which API call failed if needed
+        status = e.response.status_code
+        if status == 404:
+            message = f"Riot ID '{game_name}#{tag_line}' not found."
             return JsonResponse({'exists': False, 'message': message}, status=404)
-        elif e.response.status_code == 429:
-             logger.warning(f"Riot API Rate Limit Exceeded for {game_name}#{tag_line}")
-             return JsonResponse({'exists': False, 'message': 'API rate limit exceeded. Try again shortly.'}, status=429)
-        elif e.response.status_code == 403:
-             logger.error(f"Riot API Forbidden for {game_name}#{tag_line} - Check API Key/Region: {e}")
-             return JsonResponse({'exists': False, 'message': 'API key invalid or restricted.'}, status=403)
-        else:
-            logger.error(f"Unhandled Riot API HTTP Error for {game_name}#{tag_line}: {e.response.status_code}")
-            return JsonResponse({'exists': False, 'message': f'An API error occurred ({e.response.status_code}).'}, status=e.response.status_code)
+        if status == 429:
+            return JsonResponse({'exists': False, 'message': 'API rate limit exceeded. Try again shortly.'}, status=429)
+        if status == 403:
+            return JsonResponse({'exists': False, 'message': 'API key invalid or restricted.'}, status=403)
+        return JsonResponse({'exists': False, 'message': f'An API error occurred ({status}).'}, status=status)
 
     except requests.exceptions.RequestException as e:
-        # Network errors, timeouts, etc.
         logger.error(f"Riot API Request Exception for {game_name}#{tag_line}: {e}")
         return JsonResponse({'exists': False, 'message': 'Could not connect to Riot API.'}, status=500)
 
     except Exception as e:
-        # Catch any other unexpected errors
         logger.error(f"Unexpected error in validate_summoner for {game_name}#{tag_line}: {e}", exc_info=True)
         return JsonResponse({'exists': False, 'message': 'An internal server error occurred.'}, status=500)
 
@@ -230,3 +212,64 @@ def validate_summoner(request):
 @login_required
 def review_create_form(request):
         return render(request, 'review_create.html')
+
+import logging
+import traceback
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import requests
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_matches_for_player(request):
+    puuid = request.POST.get('puuid', '').strip()
+    if not puuid:
+        return JsonResponse({'error': 'Missing puuid'}, status=400)
+
+    # Ajusta la región según donde juegues
+    REGION_MATCHES = "europe"  # o "americas", "asia", etc.
+    match_list_url = (
+        f"https://{REGION_MATCHES}.api.riotgames.com"
+        f"/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=5"
+    )
+
+    # 1) loguea PUUID y URL
+    logger.info(f"[get_matches] puuid = {puuid}")
+    logger.info(f"[get_matches] URL   = {match_list_url}")
+
+    try:
+        resp = requests.get(match_list_url,
+                            headers={"X-Riot-Token": settings.RIOT_API_KEY},
+                            timeout=5)
+        resp.raise_for_status()
+        match_ids = resp.json()
+
+        matches = []
+        for match_id in match_ids:
+            detail_url = f"https://{REGION_MATCHES}.api.riotgames.com/lol/match/v5/matches/{match_id}"
+            logger.info(f"[get_matches] detail URL = {detail_url}")
+            md = requests.get(detail_url,
+                              headers={"X-Riot-Token": settings.RIOT_API_KEY},
+                              timeout=5)
+            md.raise_for_status()
+            info = md.json().get("info", {})
+            matches.append({
+                'id': match_id,
+                'gameMode': info.get('gameMode'),
+                'duration': info.get('gameDuration'),
+                'timestamp': info.get('gameStartTimestamp'),
+            })
+
+        logger.info(f"[get_matches] found {len(matches)} matches")
+        return JsonResponse({'matches': matches})
+
+    except Exception as e:
+        # 2) Log completo de la excepción
+        logger.error("[get_matches] Exception!", exc_info=True)
+        # opcional: imprime también en stdout
+        traceback.print_exc()
+        return JsonResponse({'error': str(e)}, status=500)
