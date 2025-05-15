@@ -420,3 +420,29 @@ def get_matches_for_player(request):
         # opcional: imprime también en stdout
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Review
+
+@login_required
+def review_update_list(request):
+    # Solo tus reseñas
+    reviews = Review.objects.filter(from_user=request.user).order_by('-timestamp')
+    return render(request, 'review_update_list.html', {'reviews': reviews})
+
+@login_required
+def review_update(request, pk):
+    # Asegura que solo tú puedas editarla
+    review = get_object_or_404(Review, pk=pk, from_user=request.user)
+
+    if request.method == 'POST':
+        # Actualiza campos
+        review.title = request.POST.get('title')
+        review.body  = request.POST.get('body')
+        review.save()
+        return redirect('review_update_list')
+
+    return render(request, 'review_update.html', {'review': review})

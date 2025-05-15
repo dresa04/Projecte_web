@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Editar reseña{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:600px;">
+  <h1>Editar reseña para {{ review.to_user.username }}</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Título</label>
+      <input type="text" name="title" class="form-control" value="{{ review.title }}" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Contenido</label>
+      <textarea name="body" class="form-control" rows="5" required>{{ review.body }}</textarea>
+    </div>
+    <button type="submit" class="btn">Guardar cambios</button>
+    <a href="{% url 'review_update_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
