@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Mis reseñas para editar{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Modificar mis reseñas</h1>
+  <hr>
+  {% if reviews %}
+    <ul class="list-unstyled">
+      {% for r in reviews %}
+      <li class="mb-3">
+        <div class="review-box">
+          <h5>{{ r.title }}</h5>
+          <p>{{ r.body|truncatewords:20 }}</p>
+          <small class="text-muted">para {{ r.to_user.username }} — {{ r.timestamp|date:"Y-m-d H:i" }}</small>
+          <br>
+          <a href="{% url 'review_update' r.pk %}" class="btn btn-sm">Editar</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No has escrito aún ninguna reseña.</p>
+  {% endif %}
+</div>
+{% endblock %}
