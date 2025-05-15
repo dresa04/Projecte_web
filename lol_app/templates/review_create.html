@@ -33,9 +33,10 @@
         <!-- Match Select: oculto hasta cargar partidas -->
         <div class="form-group" id="match_select_container" style="display: none; margin-top: 1rem;">
             <label for="match_id">Selecciona una partida</label>
-            <select name="match_id" id="match_id" class="form-control" required>
+            <select name="match_id" id="match_id" class="form-control">
                 <option value="">Cargando partidas...</option>
             </select>
+            <small class="form-text text-muted">Opcional: selecciona una partida para asociar con esta reseña</small>
         </div>
 
         <!-- Título y cuerpo de la reseña -->
@@ -79,6 +80,7 @@
 
     let typingTimer;
     const doneTypingInterval = 700;
+    let currentPuuid = '';  // Store the puuid for form submission
 
     playerIdInput.addEventListener('input', () => {
         clearTimeout(typingTimer);
@@ -117,6 +119,10 @@
             summonerFeedback.textContent = `Encontrado: ${data.gameName}#${data.tagLine} (Nv. ${data.summonerLevel})`;
             summonerFeedback.style.color = 'green';
 
+            // Update the player_id_input with the normalized format from the API
+            playerIdInput.value = `${data.gameName}#${data.tagLine}`;
+            currentPuuid = data.puuid;
+
             return fetch("{% url 'get_matches' %}", {
                 method: 'POST',
                 headers: {
@@ -129,6 +135,13 @@
         .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
         .then(matchData => {
             matchSelect.innerHTML = '';
+
+            // Add a default "No match" option
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.text = '-- Sin partida asociada --';
+            matchSelect.append(defaultOpt);
+
             if (Array.isArray(matchData.matches) && matchData.matches.length) {
                 matchData.matches.forEach(m => {
                     const opt = document.createElement('option');
@@ -137,13 +150,14 @@
                     opt.text = `${m.gameMode} – ${date.toLocaleDateString()} – ${Math.round(m.duration/60)} min`;
                     matchSelect.append(opt);
                 });
+                matchContainer.style.display = 'block';
             } else {
                 const opt = document.createElement('option');
                 opt.value = '';
-                opt.text = 'No se encontraron partidas';
+                opt.text = 'No se encontraron partidas recientes';
                 matchSelect.append(opt);
+                matchContainer.style.display = 'block';
             }
-            matchContainer.style.display = 'block';
         })
         .catch(err => {
             console.error(err);
