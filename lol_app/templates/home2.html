@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Home - Reviews{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Player Reviews</h1>
+    <hr>
+
+    {% if reviews %}
+        {% for review in reviews %}
+        <div class="review-box">
+            <p><strong>Review for {{ review.to_user.username }}</strong> by <strong>{{ review.from_user.username }}</strong></p>
+            <h5>{{ review.title }}</h5>
+            <p>{{ review.body|linebreaksbr }}</p>
+            <div class="review-meta">
+                Posted on {{ review.timestamp|date:"F d, Y, P" }}
+                {% if review.match %}
+                <br>
+                <small>Match: {{ review.match.match_id }} ({{ review.match.date_played|date:"F d, Y" }})</small>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No reviews have been posted yet. Be the first!</p>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'review_create_form' %}" class="btn btn-primary">Write a review</a>
+    </div>
+</div>
+
+<style>
+.review-box {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.review-meta {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 5px;
+}
+</style>
+{% endblock %}

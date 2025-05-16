@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Confirmar eliminación{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:600px;">
+  <h1>¿Eliminar reseña?</h1>
+  <div class="review-box">
+    <h5>{{ review.title }}</h5>
+    <p>{{ review.body|linebreaksbr }}</p>
+    <small class="text-muted">
+      para {{ review.to_user.username }} — {{ review.timestamp|date:"Y-m-d H:i" }}
+    </small>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn">Sí, eliminar</button>
+    <a href="{% url 'review_delete_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
