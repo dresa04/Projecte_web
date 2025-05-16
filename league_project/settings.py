@@ -136,7 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # settings.py
-RIOT_API_KEY = 'RGAPI-4546de0b-d9e2-4589-9bb8-f3ef660856e7'
+RIOT_API_KEY = 'RGAPI-5235f8ed-e43c-4353-a911-7a0b24fa45d6'
 
 
 LOGIN_REDIRECT_URL = 'home'

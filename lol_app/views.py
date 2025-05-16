@@ -35,6 +35,7 @@ def home(request):
     return render(request, 'home.html')
 
 
+# 2) Registro de usuario
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
