@@ -1,33 +1,37 @@
-from splinter import Browser
+from behave import *
+from splinter.browser import Browser
 from django.test.runner import DiscoverRunner
-from django.test.utils import setup_test_environment, teardown_test_environment
 
 
+# Use Firefox if available, otherwise try Chrome, then fallback to a warning
 def before_all(context):
-    try:
-        # Limpiar el entorno primero
-        teardown_test_environment()
-    except:
-        pass
+    # Function to build complete URLs
+    context.get_url = lambda path: f"http://localhost:8000{path}"
 
-    context.browser = Browser('firefox', headless=True)
-    context.test_runner = DiscoverRunner()
-    setup_test_environment()
-    context.test_db = context.test_runner.setup_databases()
-    context.get_url = lambda path: f'http://localhost:8000{path}'
+    # With behave-django, the test environment is already set up for us
+    # We just need to set up the browser
+
+    # Try to set up browser with multiple driver fallbacks
+    try:
+        context.browser = Browser('firefox', headless=True)
+        print("Using Firefox browser")
+    except Exception as firefox_error:
+        print(f"Firefox driver error: {firefox_error}")
+        try:
+            context.browser = Browser('chrome', headless=True)
+            print("Using Chrome browser")
+        except Exception as chrome_error:
+            print(f"Chrome driver error: {chrome_error}")
+            print("WARNING: No suitable browser driver found. Tests requiring a browser will fail.")
+            context.browser = None
 
 
 def after_scenario(context, scenario):
-    # Limpiar después de cada escenario
+    # Clean up after each scenario if needed
     pass
 
 
 def after_all(context):
-    try:
-        if hasattr(context, 'browser'):
-            context.browser.quit()
-        if hasattr(context, 'test_db'):
-            context.test_runner.teardown_databases(context.test_db)
-        teardown_test_environment()
-    except Exception as e:
-        print(f"Error en teardown: {e}")
+    # Proper cleanup of resources
+    if hasattr(context, 'browser') and context.browser:
+        context.browser.quit()
