@@ -6,7 +6,7 @@ Feature: Create Review
   Scenario: Successfully create a review
     Given I am logged in as a user
     And I am on the create review page
-    When I enter a valid Riot ID "TestPlayer#EUW"
+    When I enter a valid Riot ID "Boira04#EUW"
     And I fill in the title field with "Great Support Player"
     And I fill in the body field with "This player has excellent map awareness and good communication."
     And I click the submit button

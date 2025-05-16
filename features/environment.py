@@ -13,7 +13,7 @@ def before_all(context):
 
     # Try to set up browser with multiple driver fallbacks
     try:
-        context.browser = Browser('firefox', headless=False)
+        context.browser = Browser('firefox', headless=True)
         print("Using Firefox browser")
     except Exception as firefox_error:
         print(f"Firefox driver error: {firefox_error}")
