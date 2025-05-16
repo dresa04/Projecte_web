@@ -1,26 +1,23 @@
-<!-- champion_list.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>List of Champions</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}List of Champions{% endblock %}
+
+{% block content %}
+<div class="container">
     <h1>List of Champions</h1>
 
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
 
-    <ul>
+    <div class="champion-list">
         {% for champion in champions %}
-            <div class="champion">
-                <h3>{{ champion.champion_id }}</h3> <!-- Nombre del campeón -->
-                <p>Rol: {{ champion.role }}</p>
-                <img src="{{ champion.image_url }}" alt="{{ champion.name }} image">
-            </div>
+        <div class="champion-card">
+            <img src="{{ champion.image_url }}" alt="{{ champion.name }}" class="champion-image">
+            <h3>{{ champion.name }}</h3>
+            <p>Role: {{ champion.role }}</p>
+        </div>
         {% endfor %}
-
-    </ul>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}
