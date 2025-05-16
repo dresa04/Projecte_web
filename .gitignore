@@ -6,7 +6,7 @@ venv/
 *.env
 *.pyc
 __pycache__/
-settings.py
+
 
 # Archivos generados automáticamente
 *.log

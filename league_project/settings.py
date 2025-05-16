@@ -14,11 +14,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -136,7 +137,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # settings.py
-RIOT_API_KEY = 'RGAPI-27aaf939-ef48-43ee-8718-2151a9343201'
+RIOT_API_KEY = os.getenv('RIOT_API_KEY', "RGAPI-27aaf939-ef48-43ee-8718-2151a9343201")
 
 
 LOGIN_REDIRECT_URL = 'home'
