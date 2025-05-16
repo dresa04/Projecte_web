@@ -38,7 +38,24 @@
         <div class="nav-right">
             {% if user.is_authenticated %}
                 <span class="nav-user">Hola, {{ user.username }}</span>
-                <a href="{% url 'logout' %}">Logout</a>
+                <form method="post" action="{% url 'logout' %}"
+                  style="all: unset; display: inline;">
+              {% csrf_token %}
+              <button type="submit"
+                      style="
+                        all: unset;
+                        color: #FFD700;
+                        font-weight: bold;
+                        cursor: pointer;
+                      "
+                      onmouseover="this.style.textDecoration='underline'"
+                      onmouseout="this.style.textDecoration='none'">
+                Logout
+              </button>
+            </form>
+
+
+
             {% else %}
                 <a href="{% url 'login' %}">Login</a>
                 <a href="{% url 'register' %}">Register</a>
