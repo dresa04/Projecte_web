@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lol_app',
+    'behave_django',
 ]
 
 MIDDLEWARE = [

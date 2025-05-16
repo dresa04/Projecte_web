@@ -16,7 +16,11 @@ dependencies = [
     "idna (==3.10)",
     "pillow (==11.1.0)",
     "sqlparse (==0.5.3)",
-    "urllib3 (==2.3.0)"
+    "urllib3 (==2.3.0)",
+    "behave (==1.2.6)",
+    "behave-django (==1.4.0)",
+    "splinter (>=0.21.0,<0.22.0)",
+    "selenium (>=4.32.0,<5.0.0)",
 ]
 
 
