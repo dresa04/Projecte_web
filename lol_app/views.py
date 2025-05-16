@@ -96,7 +96,7 @@ def home(request: HttpRequest) -> HttpResponse:
     context = {
         'reviews': reviews
     }
-    return render(request, 'home2.html', context)
+    return render(request, 'homes/home2.html', context)
 
 
 @login_required
