@@ -4,37 +4,37 @@
 {% block content %}
 <div class="container" style="max-width: 700px;">
   <div class="review-box">
-    <span vocab="https://schema.org/" typeof="Review">
+    <div vocab="https://schema.org/" typeof="Review">
 
       <h2 property="name">{{ review.title }}</h2>
 
       <p property="reviewBody">{{ review.body|linebreaksbr }}</p>
 
-      <p>Sobre el jugador: 
-        <span property="itemReviewed" typeof="Person">
-          <strong><span property="name">{{ review.to_user.username }}</span></strong>
-        </span>
+      <p>Sobre el jugador:
+        <strong>{{ review.to_user.username }}</strong>
       </p>
 
-      <p>Autor: 
+      <p>Autor:
         <span property="author" typeof="Person">
           <span property="name">{{ review.from_user.username }}</span>
         </span>
       </p>
 
-      <p>Fecha de publicación: 
-        <span property="datePublished">{{ review.timestamp|date:"Y-m-d H:i" }}</span>
+      <p>Fecha de publicación:
+        <time property="datePublished" datetime="{{ review.timestamp|date:'c' }}">
+          {{ review.timestamp|date:"Y-m-d H:i" }}
+        </time>
       </p>
 
       {% if review.match %}
-      <p>Partida relacionada: 
-        <span typeof="VideoGame">
+      <p>Partida relacionada:
+        <span property="itemReviewed" typeof="VideoGame">
           <span property="name">League of Legends – {{ review.match.match_id }}</span>
         </span>
       </p>
       {% endif %}
 
-    </span>
+    </div>
   </div>
 </div>
 
