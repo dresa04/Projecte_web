@@ -465,3 +465,10 @@ def review_confirm_delete(request, pk):
         return redirect('review_delete_list')
     return render(request, 'review_confirm_delete.html', {'review': review})
 
+
+
+def review_detail(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    return render(request, 'reviews/review_detail.html', {'review': review})
+
+

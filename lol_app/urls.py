@@ -21,4 +21,6 @@ urlpatterns = [
     # opcional:
     path('reviews/delete/<int:pk>/confirm/', views.review_confirm_delete, name='review_confirm_delete'),
 
+    path('reviews/<int:pk>/', views.review_detail, name='review_detail'),
+
 ]

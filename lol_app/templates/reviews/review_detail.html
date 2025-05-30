@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Reseña de {{ review.to_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+  <div class="review-box">
+    <div vocab="https://schema.org/" typeof="Review">
+
+      <h2 property="name">{{ review.title }}</h2>
+
+      <p property="reviewBody">{{ review.body|linebreaksbr }}</p>
+
+      <p>Sobre el jugador:
+        <strong>{{ review.to_user.username }}</strong>
+      </p>
+
+      <p>Autor:
+        <span property="author" typeof="Person">
+          <span property="name">{{ review.from_user.username }}</span>
+        </span>
+      </p>
+
+      <p>Fecha de publicación:
+        <time property="datePublished" datetime="{{ review.timestamp|date:'c' }}">
+          {{ review.timestamp|date:"Y-m-d H:i" }}
+        </time>
+      </p>
+
+      {% if review.match %}
+      <p>Partida relacionada:
+        <span property="itemReviewed" typeof="VideoGame">
+          <span property="name">League of Legends – {{ review.match.match_id }}</span>
+        </span>
+      </p>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<style>
+.review-box {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+</style>
+{% endblock %}
